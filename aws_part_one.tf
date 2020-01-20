@@ -6,6 +6,8 @@
 resource "aws_vpn_gateway" "aws-vpn-gw" {
   vpc_id = var.aws_vpc_id
 
+  amazon_side_asn = var.aws_side_asn
+
   tags = {
     Name       = "${data.aws_vpc.aws-vpc.id}-to-${data.google_compute_network.gcp-network.name}-vpn-gateway"
     Created-By = "terraform"
@@ -31,7 +33,7 @@ resource "aws_vpn_connection" "aws-vpn-connection1" {
 }
 
 resource "aws_customer_gateway" "aws-cgw-one" {
-  bgp_asn    = var.bgp_asn
+  bgp_asn    = google_compute_router.gcp-router.bgp[0].asn
   ip_address = google_compute_ha_vpn_gateway.ha-vpn-gw-a.vpn_interfaces.0.ip_address
   type       = "ipsec.1"
 
@@ -60,7 +62,7 @@ resource "aws_vpn_connection" "aws-vpn-connection2" {
 }
 
 resource "aws_customer_gateway" "aws-cgw-two" {
-  bgp_asn    = var.bgp_asn
+  bgp_asn    = google_compute_router.gcp-router.bgp[0].asn
   ip_address = google_compute_ha_vpn_gateway.ha-vpn-gw-a.vpn_interfaces.1.ip_address
   type       = "ipsec.1"
 
