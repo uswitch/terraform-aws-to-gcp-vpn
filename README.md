@@ -68,11 +68,11 @@ The remaining variables to define are the AWS_SIDE_ASN and the GCP_SIDE_ASN.
 
 #### GCP_SIDE_ASN
 
-This can be `Any private ASN (64512-65534, 4200000000-4294967294) that you are not already using in the peer network. The ASN is used for all BGP sessions on the same Cloud Router, and it cannot be changed later. All VPN tunnels that link to this router will have the same local ASN.` On the Google side, this needs to be set but as AWS Customer Gateway uses `65000` as the default, we will also have `65000` as the default
+This can be `"Any private ASN (64512-65534, 4200000000-4294967294) that you are not already using in the peer network. The ASN is used for all BGP sessions on the same Cloud Router, and it cannot be changed later. All VPN tunnels that link to this router will have the same local ASN."` On the Google side, this needs to be set but as AWS Customer Gateway uses `65000` as the default, we will also have `65000` as the default
 
 #### AWS_SIDE_ASN
 
-Similar to tbe GCP_SIDE_ASN `You can choose any private ASN. Ranges for 16-bit private ASNs include 64512 to 65534. You can also provide 32-bit ASNs between 4200000000 and 4294967294. You cannot change the ASN later, changing the ASN wi;; required recreating all the infrastrcuture again ` Amazon will provide a default ASN for the virtual gateway if you don’t choose one. This default is `64512`, so we have made `64512` our defult also
+Similar to tbe GCP_SIDE_ASN `"You can choose any private ASN. Ranges for 16-bit private ASNs include 64512 to 65534. You can also provide 32-bit ASNs between 4200000000 and 4294967294. You cannot change the ASN later, changing the ASN wi;; required recreating all the infrastrcuture again"` Amazon will provide a default ASN for the virtual gateway if you don’t choose one. This default is `64512`, so we have made `64512` our defult also
 
 ```
 module "aws-to-gcp-vpn" {
@@ -95,7 +95,7 @@ This will spin up 2 VPNs and 4 tunnels between AWS and GCP.
 
 To enable communication from the AWS side, you will need to create routes to the subnet where you would like to connect too.
 
-For example;
+### For example;
 ```
 resource "aws_route" "route_to_vpn_gateway" {
   route_table_id         = << ROUTE_TABLE_ID >>
@@ -109,6 +109,51 @@ resource "aws_route" "route_to_vpn_gateway" {
 
 `VPN_GATEWAY_ID` is the ID of the VPN Gateway which can be accessed as an output from the module using something similar to `module.aws-to-gcp-vpn.aws_vpn_gateway_id`
 
+We will also need to create Security Groups on the AWS side and Firewall Rules on the GCP side
+
+### AWS Security Group example; 
+```
+resource "aws_security_group" "aws-to-gcp" {
+  name        = "aws-to-gcp"
+  description = "Allow everything from GCP"
+  vpc_id      = << VPC_ID >>
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [ << GOOGLE_SUBNET_CIDR_RANGE >> ]
+  }
+}
+```
+`VPC_ID` is the ID of the VPC where the AWS subnets you want to communicate from, were created
+
+`GOOGLE_SUBNET_CIDR_RANGE` is the cidr range of your subnets in your GCP network.
+
+### GCP Firewall example;
+```
+resource "google_compute_firewall" "gcp-to-aws" {
+  name    = "gcp-to-aws"
+  network = << GOOGLE_NETWORK_NAME >>
+
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]
+  }
+
+  allow {
+    protocol = "udp"
+    ports    = ["0-65535"]
+  }
+
+  source_ranges = [
+    << AWS_SUBNET_CIDR_RANGE >>
+  ]
+}
+```
+`GOOGLE_NETWORK_NAME` is the name of your Google Network
+
+`AWS_SUBNET_CIDR_RANGE` is the cidr range of your subnets in your AWS VPC.
 
 ## Example
 The example directory contains an example of how to use the module and the variables to be passed to the module.
