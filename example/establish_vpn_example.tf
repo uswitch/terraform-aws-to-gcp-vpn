@@ -28,17 +28,17 @@ resource "google_compute_subnetwork" "gcp-subnet2" {
 
 
 module "aws-to-gcp-vpn" {
-  source = "./module"
+  source = "git@github.com:uswitch/terraform-aws-to-gcp-vpn.git"
 
   # AWS Variables
-  aws_vpc_id = data.aws_vpc.aws-vpc.id
-  aws_region = var.aws_region
-  bgp_asn    = var.bgp_asn
+  aws_vpc_id   = data.aws_vpc.aws-vpc.id
+  aws_side_asn = var.aws_side_asn
+  aws_region   = var.aws_region
+
 
   # GCP Variables
   gcp_network_name = google_compute_network.gcp-network.name
-  gcp_subnet1_cidr = var.gcp_subnet1_cidr
-  gcp_subnet2_cidr = var.gcp_subnet2_cidr
+  gcp_side_asn     = var.gcp_side_asn
   gcp_region       = var.gcp_region
 
 }

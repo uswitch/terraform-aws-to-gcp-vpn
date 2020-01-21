@@ -22,7 +22,7 @@ resource "google_compute_router" "gcp-router" {
   network = data.google_compute_network.gcp-network.name
 
   bgp {
-    asn = aws_customer_gateway.aws-cgw-one.bgp_asn
+    asn = var.gcp_side_asn
   }
 }
 
