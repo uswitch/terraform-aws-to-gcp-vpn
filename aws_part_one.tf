@@ -5,13 +5,13 @@
  */
 
 resource "aws_vpn_connection" "aws-vpn-connection1" {
-  transit_gateway_id      = data.aws_ec2_transit_gateway.aws-transit-gateway.id
+  transit_gateway_id      = var.aws_transit_gateway_id
   customer_gateway_id = aws_customer_gateway.aws-cgw-one.id
   type                = "ipsec.1"
   static_routes_only  = false
 
   tags = {
-    Name       = "${data.aws_ec2_transit_gateway.aws-transit-gateway.id}-to-${data.google_compute_network.gcp-network.name}-vpn-connection-1"
+    Name       = "${var.aws_transit_gateway_id}-to-${var.gcp_network_name}-vpn-connection-1"
     Created-By = "terraform"
   }
 }
@@ -22,7 +22,7 @@ resource "aws_customer_gateway" "aws-cgw-one" {
   type       = "ipsec.1"
 
   tags = {
-    Name       = "${data.aws_ec2_transit_gateway.aws-transit-gateway.id}-to-${data.google_compute_network.gcp-network.name}-customer-gateway-1"
+    Name       = "${var.aws_transit_gateway_id}-to-${var.gcp_network_name}-customer-gateway-1"
     Created-By = "terraform"
   }
 }
@@ -34,13 +34,13 @@ resource "aws_customer_gateway" "aws-cgw-one" {
  */
 
 resource "aws_vpn_connection" "aws-vpn-connection2" {
-  transit_gateway_id      = data.aws_ec2_transit_gateway.aws-transit-gateway.id
+  transit_gateway_id      = var.aws_transit_gateway_id
   customer_gateway_id = aws_customer_gateway.aws-cgw-two.id
   type                = "ipsec.1"
   static_routes_only  = false
 
   tags = {
-    Name       = "${data.aws_ec2_transit_gateway.aws-transit-gateway.id}-to-${data.google_compute_network.gcp-network.name}-vpn-connection-2"
+    Name       = "${var.aws_transit_gateway_id}-to-${var.gcp_network_name}-vpn-connection-2"
     Created-By = "terraform"
   }
 }
@@ -51,7 +51,7 @@ resource "aws_customer_gateway" "aws-cgw-two" {
   type       = "ipsec.1"
 
   tags = {
-    Name       = "${data.aws_ec2_transit_gateway.aws-transit-gateway.id}-to-${data.google_compute_network.gcp-network.name}-customer-gateway-2"
+    Name       = "${var.aws_transit_gateway_id}-to-${var.gcp_network_name}-customer-gateway-2"
     Created-By = "terraform"
   }
 }

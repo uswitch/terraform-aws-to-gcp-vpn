@@ -7,9 +7,9 @@
 resource "google_compute_ha_vpn_gateway" "ha-vpn-gw-a" {
   provider = google-beta
 
-  name    = "${data.google_compute_network.gcp-network.name}-to-${data.aws_ec2_transit_gateway.aws-transit-gateway.id}-ha-vpn-gateway"
+  name    = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-ha-vpn-gateway"
   region  = var.gcp_region
-  network = data.google_compute_network.gcp-network.self_link
+  network = var.gcp_network_name
 }
 
 /*
@@ -17,9 +17,9 @@ resource "google_compute_ha_vpn_gateway" "ha-vpn-gw-a" {
  * --------CREATE CLOUD ROUTER-------
  */
 resource "google_compute_router" "gcp-router" {
-  name    = "${data.google_compute_network.gcp-network.name}-to-${data.aws_ec2_transit_gateway.aws-transit-gateway.id}-router"
+  name    = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-router"
   region  = var.gcp_region
-  network = data.google_compute_network.gcp-network.name
+  network = var.gcp_network_name
 
   bgp {
     dynamic "advertised_ip_ranges" {
