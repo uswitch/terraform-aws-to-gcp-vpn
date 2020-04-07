@@ -6,7 +6,7 @@
 resource "google_compute_external_vpn_gateway" "external_gateway" {
   provider = google-beta
 
-  name            = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-external-vpn-gateway"
+  name            = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-external-vpn-gateway"
   redundancy_type = "FOUR_IPS_REDUNDANCY"
   description     = "An externally managed VPN gateway"
   interface {
@@ -35,7 +35,7 @@ resource "google_compute_external_vpn_gateway" "external_gateway" {
 resource "google_compute_vpn_tunnel" "tunnel-to-aws-connection-0-ip0" {
   provider = google-beta
 
-  name = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-vpn-tunnel-1-ip-1"
+  name = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-vpn-tunnel-1-ip-1"
 
   peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.self_link
   peer_external_gateway_interface = google_compute_external_vpn_gateway.external_gateway.interface.0.id
@@ -50,7 +50,7 @@ resource "google_compute_vpn_tunnel" "tunnel-to-aws-connection-0-ip0" {
 resource "google_compute_vpn_tunnel" "tunnel-to-aws-connection-0-ip1" {
   provider = google-beta
 
-  name = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-vpn-tunnel-1-ip-2"
+  name = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-vpn-tunnel-1-ip-2"
 
   peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.self_link
   peer_external_gateway_interface = google_compute_external_vpn_gateway.external_gateway.interface.1.id
@@ -65,7 +65,7 @@ resource "google_compute_vpn_tunnel" "tunnel-to-aws-connection-0-ip1" {
 resource "google_compute_vpn_tunnel" "tunnel-to-aws-connection-1-ip0" {
   provider = google-beta
 
-  name = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-vpn-tunnel-2-ip-1"
+  name = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-vpn-tunnel-2-ip-1"
 
   peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.self_link
   peer_external_gateway_interface = google_compute_external_vpn_gateway.external_gateway.interface.2.id
@@ -80,7 +80,7 @@ resource "google_compute_vpn_tunnel" "tunnel-to-aws-connection-1-ip0" {
 resource "google_compute_vpn_tunnel" "tunnel-to-aws-connection-1-ip1" {
   provider = google-beta
 
-  name = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-vpn-tunnel-2-ip-2"
+  name = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-vpn-tunnel-2-ip-2"
 
   peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.self_link
   peer_external_gateway_interface = google_compute_external_vpn_gateway.external_gateway.interface.3.id
@@ -99,7 +99,7 @@ resource "google_compute_vpn_tunnel" "tunnel-to-aws-connection-1-ip1" {
 
 # FIRST VPN TUNNEL
 resource "google_compute_router_interface" "router_interface1" {
-  name = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-router-interface-1"
+  name = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-router-interface-1"
 
   router     = google_compute_router.gcp-router.name
   vpn_tunnel = google_compute_vpn_tunnel.tunnel-to-aws-connection-0-ip0.name
@@ -108,7 +108,7 @@ resource "google_compute_router_interface" "router_interface1" {
 }
 
 resource "google_compute_router_peer" "gcp-to-aws-bgp1" {
-  name            = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-router-peer-bgp-1"
+  name            = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-router-peer-bgp-1"
   router          = google_compute_router.gcp-router.name
   peer_asn        = aws_vpn_connection.aws-vpn-connection1.tunnel1_bgp_asn
   peer_ip_address = aws_vpn_connection.aws-vpn-connection1.tunnel1_vgw_inside_address
@@ -118,7 +118,7 @@ resource "google_compute_router_peer" "gcp-to-aws-bgp1" {
 
 # SECOND VPN TUNNEL
 resource "google_compute_router_interface" "router_interface2" {
-  name       = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-router-interface-2"
+  name       = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-router-interface-2"
   router     = google_compute_router.gcp-router.name
   vpn_tunnel = google_compute_vpn_tunnel.tunnel-to-aws-connection-0-ip1.name
   ip_range   = "${aws_vpn_connection.aws-vpn-connection1.tunnel2_cgw_inside_address}/30"
@@ -126,7 +126,7 @@ resource "google_compute_router_interface" "router_interface2" {
 }
 
 resource "google_compute_router_peer" "gcp-to-aws-bgp2" {
-  name            = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-router-peer-bgp-2"
+  name            = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-router-peer-bgp-2"
   router          = google_compute_router.gcp-router.name
   peer_asn        = aws_vpn_connection.aws-vpn-connection1.tunnel2_bgp_asn
   peer_ip_address = aws_vpn_connection.aws-vpn-connection1.tunnel2_vgw_inside_address
@@ -136,7 +136,7 @@ resource "google_compute_router_peer" "gcp-to-aws-bgp2" {
 
 # THIRD VPN TUNNEL
 resource "google_compute_router_interface" "router_interface3" {
-  name       = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-router-interface-3"
+  name       = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-router-interface-3"
   router     = google_compute_router.gcp-router.name
   vpn_tunnel = google_compute_vpn_tunnel.tunnel-to-aws-connection-1-ip0.name
   ip_range   = "${aws_vpn_connection.aws-vpn-connection2.tunnel1_cgw_inside_address}/30"
@@ -144,7 +144,7 @@ resource "google_compute_router_interface" "router_interface3" {
 }
 
 resource "google_compute_router_peer" "gcp-to-aws-bgp3" {
-  name            = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-router-peer-bgp-3"
+  name            = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-router-peer-bgp-3"
   router          = google_compute_router.gcp-router.name
   peer_asn        = aws_vpn_connection.aws-vpn-connection2.tunnel1_bgp_asn
   peer_ip_address = aws_vpn_connection.aws-vpn-connection2.tunnel1_vgw_inside_address
@@ -154,7 +154,7 @@ resource "google_compute_router_peer" "gcp-to-aws-bgp3" {
 
 # FOURTH VPN TUNNEL
 resource "google_compute_router_interface" "router_interface4" {
-  name       = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-router-interface-4"
+  name       = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-router-interface-4"
   router     = google_compute_router.gcp-router.name
   vpn_tunnel = google_compute_vpn_tunnel.tunnel-to-aws-connection-1-ip1.name
   ip_range   = "${aws_vpn_connection.aws-vpn-connection2.tunnel2_cgw_inside_address}/30"
@@ -162,7 +162,7 @@ resource "google_compute_router_interface" "router_interface4" {
 }
 
 resource "google_compute_router_peer" "gcp-to-aws-bgp4" {
-  name            = "${data.google_compute_network.gcp-network.name}-to-${data.aws_vpc.aws-vpc.id}-router-peer-bgp-4"
+  name            = "${var.gcp_network_name}-to-${var.aws_transit_gateway_id}-router-peer-bgp-4"
   router          = google_compute_router.gcp-router.name
   peer_asn        = aws_vpn_connection.aws-vpn-connection2.tunnel2_bgp_asn
   peer_ip_address = aws_vpn_connection.aws-vpn-connection2.tunnel2_vgw_inside_address
